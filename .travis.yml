@@ -6,7 +6,7 @@ install:
 script:
     - jsonschema $(find . -name '*.json' -printf ' -i %f') template.schema
     - |
-      import json
+      python -c "import json
       import os
       errors = []
       for file_to_check in [r for r in os.listdir(os.curdir) if r.endswith('.json')]:
@@ -16,4 +16,4 @@ script:
             if expected_filename != file_to_check:
                 errors += ['File name {} not matching the pattern. Expected {}'.format(file_to_check, expected_filename)]
       if len(errors) > 0:
-          assert False, '\n'.join(errors)
+          assert False, '\n'.join(errors)"
