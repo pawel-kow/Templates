@@ -3,7 +3,7 @@
   "providerName": "Entri",
   "serviceId": "mixo",
   "serviceName": "Mixo",
-  "version": 5,
+  "version": 6,
   "logoUrl": "https://cdn.goentri.com/logo.svg",
   "description": "Allows user to easily set up domain using Entri",
   "syncPubKeyDomain": "goentri.com",
