@@ -3,7 +3,7 @@
    "providerName":"AWeber",
    "serviceId":"web-subdomain",
    "serviceName":"Landing Pages for Subdomains",
-   "version": 1,
+   "version": 2,
    "syncRedirectDomain": "aweber.com, optin.com",
    "syncPubKeyDomain": "optin.com",
    "logoUrl":"https://assets.aweber-static.com/page-templates/assets/img/powered_by.png",
