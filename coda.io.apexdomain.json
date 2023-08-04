@@ -3,7 +3,7 @@
     "providerName":"Coda",
     "serviceId":"apexdomain",
     "serviceName":"Coda Site",
-    "version": 1,
+    "version": 2,
     "syncPubKeyDomain" : "domainconnect.coda.io",
     "logoUrl":"https://cdn.coda.io/icons/png/color/coda-192.png",
     "description":"Allows serving Coda documents from your own domain (apex only).",
