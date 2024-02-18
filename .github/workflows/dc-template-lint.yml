@@ -52,15 +52,14 @@ jobs:
         env:
             ALL_CHANGED_FILES: ${{ steps.changed-json-files.outputs.all_changed_files }}
         run: |
-          echo "linter_output:<<EOF" >> $GITHUB_ENV
+          echo "linter_output<<EOF" >> $GITHUB_ENV
           for file in ${ALL_CHANGED_FILES}; do
             `go env GOPATH`/bin/dc-template-linter -loglevel error $file 2>> $GITHUB_ENV || true
           done
           echo "EOF" >> $GITHUB_ENV
-          #echo "*** Result ***"
-          #echo "$linter_output"
-          #echo "*** End result ***"
-          #echo "::set-output name=linter::$linter_output"
+          echo "*** Result ***"
+          echo "$linter_output"
+          echo "*** End result ***"
 
       - name: Comment PR with linter result
         uses: thollander/actions-comment-pull-request@v2
