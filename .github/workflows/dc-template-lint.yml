@@ -43,6 +43,8 @@ jobs:
         run: |
             echo "version_bump_check<<EOF" >> $GITHUB_ENV
             echo "version_bump_check=0" >> "$GITHUB_OUTPUT"
+            echo "Base: ${{ github.event.pull_request.base.sha }}"
+            echo "Head: ${{ github.event.pull_request.head.sha }}"
             for file in ${ALL_MODIFIED_FILES}; do
                 echo "$file was modified"
                 if ! git diff -U0 ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} -- $file | grep "version"; then
@@ -95,7 +97,7 @@ jobs:
             if ! `go env GOPATH`/bin/dc-template-linter -loglevel error -inplace $file 2>> $GITHUB_ENV; then
                 echo "linter_error=1" >> "$GITHUB_OUTPUT"
                 echo "Linter error for $file"
-                `go env GOPATH`/bin/dc-template-linter -loglevel error -inplace $file
+                `go env GOPATH`/bin/dc-template-linter -loglevel error -inplace $file || true
             fi
           done
           echo "EOF" >> $GITHUB_ENV
