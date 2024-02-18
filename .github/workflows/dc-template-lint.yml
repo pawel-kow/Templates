@@ -21,7 +21,7 @@ jobs:
         run: go install github.com/Domain-Connect/dc-template-linter@latest
 
       - name: Lint Templates
-        run: ${{ github.workspace }}/go/bin/dc-template-linter ./*.json
+        run: $GOPATH/bin/dc-template-linter ./*.json
 
 #      - name: Comment PR with Linter Results
 #        # Use a GitHub Action or script to format and post the linter results as a comment on the PR
