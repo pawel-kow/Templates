@@ -48,18 +48,19 @@ jobs:
 
       - name: Lint changed Templates
         if: steps.changed-json-files.outputs.any_changed == 'true'
+        id: linter-output
         env:
             ALL_CHANGED_FILES: ${{ steps.changed-json-files.outputs.all_changed_files }}
         run: |
+          echo "linter_output:<<EOF" >> $GITHUB_ENV
           for file in ${ALL_CHANGED_FILES}; do
-            `go env GOPATH`/bin/dc-template-linter -loglevel error $file
+            `go env GOPATH`/bin/dc-template-linter -loglevel error $file >> $GITHUB_ENV || true
           done
+          echo "EOF" >> $GITHUB_ENV
+          echo "::set-output name=linter::$linter_output"
 
-#      - name: Comment PR with Linter Results
-#        # Use a GitHub Action or script to format and post the linter results as a comment on the PR
-#        uses: some-action/to-comment-pr@v1
-#        with:
-#          github-token: ${{ secrets.GITHUB_TOKEN }}
-#          message: |
-#            Linter Results:
-#            # Include linter results here
+      - name: Comment PR with linter result
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: ${{ steps.linter-output.outputs.linter }}
+          comment_tag: linter
