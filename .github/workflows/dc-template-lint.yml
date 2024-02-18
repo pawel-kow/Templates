@@ -57,7 +57,7 @@ jobs:
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            Version bump needed for the files:
+            Version bump needed for the files ${{ steps.check-version-bump-needed.outputs.version_bump_check }}:
             ```
             ${{ env.version_bump_check }}
             ```
