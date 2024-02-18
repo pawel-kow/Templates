@@ -87,13 +87,17 @@ jobs:
         env:
             ALL_CHANGED_FILES: ${{ steps.changed-json-files.outputs.all_changed_files }}
         run: |
+          echo "linter_error=0" >> "$GITHUB_OUTPUT"
           echo "linter_output<<EOF" >> $GITHUB_ENV
           for file in ${ALL_CHANGED_FILES}; do
-            `go env GOPATH`/bin/dc-template-linter -loglevel error -inplace $file 2>> $GITHUB_ENV || true
+            if ! `go env GOPATH`/bin/dc-template-linter -loglevel error -inplace $file 2>> $GITHUB_ENV; then
+                echo "linter_error=1" >> "$GITHUB_OUTPUT"
+            fi
           done
           echo "EOF" >> $GITHUB_ENV
 
       - name: Comment PR with linter result
+        if: steps.linter-output.outputs.linter_error == 1
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
@@ -102,3 +106,15 @@ jobs:
             ${{ env.linter_output }}
             ```
           comment_tag: linter
+
+      - name: Remove Comment PR with linter result if not needed
+        if: steps.linter-output.outputs.linter_error != 1
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: "Linter OK"
+          comment_tag: linter
+          delete: true
+
+      - name: Fail job if version check or linter fails
+        if: steps.linter-output.outputs.linter_error == 1 || steps.check-version-bump-needed.outputs.version_bump_check == 1
+        run: exit 1
