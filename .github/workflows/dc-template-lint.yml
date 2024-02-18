@@ -18,10 +18,13 @@ jobs:
           go-version: '^1.16'
 
       - name: Install dc-template-linter
-        run: go install github.com/Domain-Connect/dc-template-linter@latest
+        run: |
+            go install github.com/Domain-Connect/dc-template-linter@latest
+            echo `go env GOPATH`/bin
 
       - name: Lint Templates
-        run: $GOPATH/bin/dc-template-linter ./*.json
+        run: |
+            `go env GOPATH`/bin/dc-template-linter ./*.json
 
 #      - name: Comment PR with Linter Results
 #        # Use a GitHub Action or script to format and post the linter results as a comment on the PR
