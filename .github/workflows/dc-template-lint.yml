@@ -35,6 +35,14 @@ jobs:
             echo "$file was changed"
           done
 
+      - name: List all modified json files
+        if: steps.changed-json-files.outputs.modified_files_count > 0
+        env:
+            ALL_MODIFIED_FILES: ${{ steps.changed-json-files.outputs.modified_files }}
+        run: |
+            for file in ${ALL_MODIFIED_FILES}; do
+                echo "$file was modified"
+            done
 
       - name: Set up Go
         uses: actions/setup-go@v2
