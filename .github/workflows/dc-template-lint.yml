@@ -64,5 +64,9 @@ jobs:
       - name: Comment PR with linter result
         uses: thollander/actions-comment-pull-request@v2
         with:
-          message: "${{ env.linter_output }}"
+          message: |
+            Linter result:
+            ```
+            ${{ env.linter_output }}
+            ```
           comment_tag: linter
