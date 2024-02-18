@@ -49,6 +49,7 @@ jobs:
                 echo "$file was modified"
                 echo "File diff $file:"
                 git diff -U0 ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} -- $file
+                echo "Check version field diff:"
                 if ! git diff -U0 ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} -- $file | grep "version"; then
                     echo "No version update detected!"
                     echo "$file" >> $GITHUB_ENV
