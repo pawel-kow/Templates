@@ -48,6 +48,8 @@ jobs:
 
       - name: Lint changed Templates
         if: steps.changed-json-files.outputs.any_changed == 'true'
+        env:
+            ALL_CHANGED_FILES: ${{ steps.changed-json-files.outputs.all_changed_files }}
         run: |
           for file in ${ALL_CHANGED_FILES}; do
             `go env GOPATH`/bin/dc-template-linter -loglevel error $file
