@@ -50,7 +50,7 @@
       "type": "SRV",
       "service": "_autodiscover",
       "protocol": "_tcp",
-      "name": "",
+      "name": "@",
       "essential": "OnApply",
       "ttl": 14400,
       "priority": 0,
