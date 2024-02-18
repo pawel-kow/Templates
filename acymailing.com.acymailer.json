@@ -16,6 +16,7 @@
             "host": "%dkimhost1%._domainkey",
             "pointsTo": "%dkimvalue1%.dkim.acymailer.com",
             "ttl": 3600
+            
         },
         {
             "type": "CNAME",
