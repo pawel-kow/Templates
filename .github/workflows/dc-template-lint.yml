@@ -40,10 +40,32 @@ jobs:
         env:
             ALL_MODIFIED_FILES: ${{ steps.changed-json-files.outputs.modified_files }}
         run: |
+            echo "version_bump_check<<EOF" >> $GITHUB_ENV
             for file in ${ALL_MODIFIED_FILES}; do
                 echo "$file was modified"
-                git diff -U0 ${{ github.event.pull_request.base.sha }} -- $file
+                if ! git diff -U0 ${{ github.event.pull_request.base.sha }} -- $file | grep "version"; then
+                    echo "$file does not bump version" >> $GITHUB_ENV
+                fi
             done
+            echo "EOF" >> $GITHUB_ENV
+
+      - name: Comment PR with version check result
+        if: steps.changed-json-files.outputs.modified_files_count > 0
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            Version bump needed for the files:
+            ```
+            ${{ github.env.version_bump_check }}
+            ```
+            comment_tag: version_bump
+
+      - name: Remove comment PR with version check result if not needed
+        if: steps.changed-json-files.outputs.modified_files_count == 0
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: "Version bump not needed"
+          mode: delete
 
       - name: Set up Go
         uses: actions/setup-go@v2
@@ -66,9 +88,6 @@ jobs:
             `go env GOPATH`/bin/dc-template-linter -loglevel error -inplace $file 2>> $GITHUB_ENV || true
           done
           echo "EOF" >> $GITHUB_ENV
-          echo "*** Result ***"
-          echo "$linter_output"
-          echo "*** End result ***"
 
       - name: Comment PR with linter result
         uses: thollander/actions-comment-pull-request@v2
