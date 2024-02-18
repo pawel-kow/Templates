@@ -50,7 +50,7 @@ jobs:
             echo "EOF" >> $GITHUB_ENV
 
       - name: Comment PR with version check result
-        if: steps.changed-json-files.outputs.modified_files_count > 0
+        if: ${{ env.version_bump_check }} != ""
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
@@ -58,14 +58,15 @@ jobs:
             ```
             ${{ env.version_bump_check }}
             ```
-            comment_tag: version_bump
+          comment_tag: version_bump
 
       - name: Remove comment PR with version check result if not needed
-        if: steps.changed-json-files.outputs.modified_files_count == 0
+        if: ${{ env.version_bump_check }} == ""
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: "Version bump not needed"
           mode: delete
+          comment_tag: version_bump
 
       - name: Set up Go
         uses: actions/setup-go@v2
