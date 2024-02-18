@@ -19,14 +19,14 @@ jobs:
             GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
 
-      - name: Get all changed markdown files
+      - name: Get all changed json files
         id: changed-json-files
         uses: tj-actions/changed-files@v42
         with:
           files: |
              **.json
 
-      - name: List all changed json files
+      - name: Print all changed json files
         if: steps.changed-json-files.outputs.any_changed == 'true'
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-json-files.outputs.all_changed_files }}
@@ -46,6 +46,8 @@ jobs:
             for file in ${ALL_MODIFIED_FILES}; do
                 echo "$file was modified"
                 if ! git diff -U0 ${{ github.event.pull_request.base.sha }} -- $file | grep "version"; then
+                    echo "File diff $file:"
+                    git diff -U0 ${{ github.event.pull_request.base.sha }} -- $file
                     echo "$file" >> $GITHUB_ENV
                     echo "version_bump_check=1" >> "$GITHUB_OUTPUT"
                 fi
@@ -57,7 +59,7 @@ jobs:
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            Version bump needed for the files ${{ steps.check-version-bump-needed.outputs.version_bump_check }}:
+            Version bump needed for the files:
             ```
             ${{ env.version_bump_check }}
             ```
@@ -92,6 +94,7 @@ jobs:
           for file in ${ALL_CHANGED_FILES}; do
             if ! `go env GOPATH`/bin/dc-template-linter -loglevel error -inplace $file 2>> $GITHUB_ENV; then
                 echo "linter_error=1" >> "$GITHUB_OUTPUT"
+                echo "Linter error for $file"
             fi
           done
           echo "EOF" >> $GITHUB_ENV
