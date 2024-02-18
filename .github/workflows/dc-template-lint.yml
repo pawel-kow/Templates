@@ -11,22 +11,31 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
+        with:
+            fetch-depth: 2
 
       - name: Dump GitHub context
         env:
             GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
 
-      - name: Get changed files
-        id: files
-        run: |
-            git log --oneline
-            git diff ${{ github.event.pull_request.base.sha }}..${{ github.sha }} --name-only
+      - name: Get all changed markdown files
+        id: changed-json-files
+        uses: tj-actions/changed-files@v42
+        with:
+          files: |
+             **.json
+             **.yml
 
-#            echo "changed_files<<EOF" >> $GITHUB_ENV
-#            git diff --name-only ${{ github.event.before }} ${{ github.event.after }} >> $GITHUB_ENV
-#            echo "EOF" >> $GITHUB_ENV
-#            echo $GITHUB_ENV
+      - name: List all changed files markdown files
+        if: steps.changed-json-files.outputs.any_changed == 'true'
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-json-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
+
 
       - name: Set up Go
         uses: actions/setup-go@v2
