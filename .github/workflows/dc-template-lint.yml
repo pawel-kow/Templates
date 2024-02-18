@@ -57,9 +57,9 @@ jobs:
             `go env GOPATH`/bin/dc-template-linter -loglevel error $file 2>> $GITHUB_ENV || true
           done
           echo "EOF" >> $GITHUB_ENV
-          echo *** Result ***
-          echo $GITHUB_ENV
-          echo *** End result ***
+          echo "*** Result ***"
+          echo "$linter_output"
+          echo "*** End result ***"
           echo "::set-output name=linter::$linter_output"
 
       - name: Comment PR with linter result
