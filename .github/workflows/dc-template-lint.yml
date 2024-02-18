@@ -56,7 +56,7 @@ jobs:
           message: |
             Version bump needed for the files:
             ```
-            ${{ github.env.version_bump_check }}
+            ${{ env.version_bump_check }}
             ```
             comment_tag: version_bump
 
@@ -95,6 +95,6 @@ jobs:
           message: |
             Linter result:
             ```
-            ${{ github.env.linter_output }}
+            ${{ env.linter_output }}
             ```
           comment_tag: linter
