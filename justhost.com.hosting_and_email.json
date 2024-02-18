@@ -9,6 +9,7 @@
   "logoUrl": "https://justhost-cdn.com/media/app/justhost/live/static/media/src/common/assets/images/brand/jh/logo.svg",
   "description": "Enables a domain to work with Just Host hosting and email",
   "variableDescription": "ip is the IP address of the server, and box is the hostname of the server.",
+
   "records": [
     {
       "pointsTo": "%ip%",
