@@ -25,10 +25,12 @@ jobs:
       - name: Get changed files
         id: files
         run: |
-            echo "changed_files<<EOF" >> $GITHUB_ENV
-            git diff --name-only ${{ github.event.before }} ${{ github.event.after }} >> $GITHUB_ENV
-            echo "EOF" >> $GITHUB_ENV
-            echo $GITHUB_ENV
+            git diff ${{ github.event.before }} ${{ github.event.after }} --name-only
+
+#            echo "changed_files<<EOF" >> $GITHUB_ENV
+#            git diff --name-only ${{ github.event.before }} ${{ github.event.after }} >> $GITHUB_ENV
+#            echo "EOF" >> $GITHUB_ENV
+#            echo $GITHUB_ENV
 
       - name: Lint Templates
         run: |
