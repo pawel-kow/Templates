@@ -95,6 +95,7 @@ jobs:
             if ! `go env GOPATH`/bin/dc-template-linter -loglevel error -inplace $file 2>> $GITHUB_ENV; then
                 echo "linter_error=1" >> "$GITHUB_OUTPUT"
                 echo "Linter error for $file"
+                echo `go env GOPATH`/bin/dc-template-linter -loglevel error -inplace $file`
             fi
           done
           echo "EOF" >> $GITHUB_ENV
