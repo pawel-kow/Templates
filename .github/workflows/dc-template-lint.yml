@@ -54,7 +54,7 @@ jobs:
         run: |
           echo "linter_output<<EOF" >> $GITHUB_ENV
           for file in ${ALL_CHANGED_FILES}; do
-            `go env GOPATH`/bin/dc-template-linter -loglevel error $file 2>> $GITHUB_ENV || true
+            `go env GOPATH`/bin/dc-template-linter -loglevel error -inplace $file 2>> $GITHUB_ENV || true
           done
           echo "EOF" >> $GITHUB_ENV
           echo "*** Result ***"
