@@ -22,9 +22,17 @@ jobs:
             go install github.com/Domain-Connect/dc-template-linter@latest
             echo `go env GOPATH`/bin
 
+      - name: Get changed files
+        id: files
+        run: |
+            echo "changed_files<<EOF" >> $GITHUB_ENV
+            git diff --name-only ${{ github.event.before }} ${{ github.event.after }} >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+            echo $GITHUB_ENV
+
       - name: Lint Templates
         run: |
-            `go env GOPATH`/bin/dc-template-linter ./*.json
+            `go env GOPATH`/bin/dc-template-linter -loglevel error ./*.json
 
 #      - name: Comment PR with Linter Results
 #        # Use a GitHub Action or script to format and post the linter results as a comment on the PR
