@@ -57,13 +57,13 @@ jobs:
             `go env GOPATH`/bin/dc-template-linter -loglevel error $file 2>> $GITHUB_ENV || true
           done
           echo "EOF" >> $GITHUB_ENV
-          echo "*** Result ***"
-          echo "$linter_output"
-          echo "*** End result ***"
-          echo "::set-output name=linter::$linter_output"
+          #echo "*** Result ***"
+          #echo "$linter_output"
+          #echo "*** End result ***"
+          #echo "::set-output name=linter::$linter_output"
 
       - name: Comment PR with linter result
         uses: thollander/actions-comment-pull-request@v2
         with:
-          message: ${{ steps.linter-output.outputs.linter }}
+          message: "${{ env.linter_output }}"
           comment_tag: linter
