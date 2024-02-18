@@ -36,21 +36,24 @@ jobs:
           done
 
       - name: List all modified json files
+        id: check-version-bump-needed
         if: steps.changed-json-files.outputs.modified_files_count > 0
         env:
             ALL_MODIFIED_FILES: ${{ steps.changed-json-files.outputs.modified_files }}
         run: |
             echo "version_bump_check<<EOF" >> $GITHUB_ENV
+            echo "version_bump_check=0" >> "$GITHUB_OUTPUT"
             for file in ${ALL_MODIFIED_FILES}; do
                 echo "$file was modified"
                 if ! git diff -U0 ${{ github.event.pull_request.base.sha }} -- $file | grep "version"; then
                     echo "$file" >> $GITHUB_ENV
+                    echo "version_bump_check=1" >> "$GITHUB_OUTPUT"
                 fi
             done
             echo "EOF" >> $GITHUB_ENV
 
       - name: Comment PR with version check result
-        if: ${{ env.version_bump_check }} != ""
+        if: ${{ steps.check-version-bump-needed.outputs.version_bump_check }} == 1
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
@@ -61,7 +64,7 @@ jobs:
           comment_tag: version_bump
 
       - name: Remove comment PR with version check result if not needed
-        if: ${{ env.version_bump_check }} == ""
+        if: ${{ steps.check-version-bump-needed.outputs.version_bump_check }} == 0
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: "Version bump not needed"
