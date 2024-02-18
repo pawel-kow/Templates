@@ -44,7 +44,7 @@ jobs:
             for file in ${ALL_MODIFIED_FILES}; do
                 echo "$file was modified"
                 if ! git diff -U0 ${{ github.event.pull_request.base.sha }} -- $file | grep "version"; then
-                    echo "$file does not bump version" >> $GITHUB_ENV
+                    echo "$file does not bump version\n" >> $GITHUB_ENV
                 fi
             done
             echo "EOF" >> $GITHUB_ENV
