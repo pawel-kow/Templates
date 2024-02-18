@@ -42,6 +42,7 @@ jobs:
         run: |
             for file in ${ALL_MODIFIED_FILES}; do
                 echo "$file was modified"
+                git diff -U0 ${{ github.event.pull_request.base.sha }} -- $file
             done
 
       - name: Set up Go
@@ -75,6 +76,6 @@ jobs:
           message: |
             Linter result:
             ```
-            ${{ env.linter_output }}
+            ${{ github.env.linter_output }}
             ```
           comment_tag: linter
