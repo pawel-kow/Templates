@@ -94,6 +94,8 @@ jobs:
         env:
             ALL_CHANGED_FILES: ${{ steps.changed-json-files.outputs.all_changed_files }}
         run: |
+          git status
+          ls -al
           echo "linter_error=0" >> "$GITHUB_OUTPUT"
           echo "linter_output<<EOF" >> $GITHUB_ENV
           for file in ${ALL_CHANGED_FILES}; do
