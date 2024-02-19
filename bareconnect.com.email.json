@@ -3,7 +3,7 @@
   "providerName": "Bareconnect",
   "serviceId": "email",
   "serviceName": "Bareconnect Email",
-  "version": 1,
+  "version": 2,
   "syncPubKeyDomain": "bareconnect.com",
   "logoUrl": "https://bareconnect.com/main-site/static/images/logo/bareconnect.png",
   "description": "Enables you to create a professional email",
