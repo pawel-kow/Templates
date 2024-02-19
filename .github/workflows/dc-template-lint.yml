@@ -1,7 +1,7 @@
 name: Lint Domain Connect Templates
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - master
 
@@ -10,23 +10,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
             fetch-depth: 2
+            ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Dump GitHub context
         env:
             GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
 
-      - name: Get all changed markdown files
+      - name: Get all changed json files
         id: changed-json-files
         uses: tj-actions/changed-files@v42
         with:
           files: |
              **.json
 
-      - name: List all changed json files
+      - name: Print all changed json files
         if: steps.changed-json-files.outputs.any_changed == 'true'
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-json-files.outputs.all_changed_files }}
@@ -35,7 +36,7 @@ jobs:
             echo "$file was changed"
           done
 
-      - name: List all modified json files
+      - name: Check all modified json files for version update
         id: check-version-bump-needed
         if: steps.changed-json-files.outputs.modified_files_count > 0
         env:
@@ -43,9 +44,15 @@ jobs:
         run: |
             echo "version_bump_check<<EOF" >> $GITHUB_ENV
             echo "version_bump_check=0" >> "$GITHUB_OUTPUT"
+            echo "Base: ${{ github.event.pull_request.base.sha }}"
+            echo "Head: ${{ github.event.pull_request.head.sha }}"
             for file in ${ALL_MODIFIED_FILES}; do
                 echo "$file was modified"
-                if ! git diff -U0 ${{ github.event.pull_request.base.sha }} -- $file | grep "version"; then
+                echo "File diff $file:"
+                git diff -U0 ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} -- $file
+                echo "Check version field diff:"
+                if ! git diff -U0 ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} -- $file | grep "version"; then
+                    echo "No version update detected!"
                     echo "$file" >> $GITHUB_ENV
                     echo "version_bump_check=1" >> "$GITHUB_OUTPUT"
                 fi
@@ -57,7 +64,7 @@ jobs:
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            Version bump needed for the files ${{ steps.check-version-bump-needed.outputs.version_bump_check }}:
+            Version bump needed for the files:
             ```
             ${{ env.version_bump_check }}
             ```
@@ -69,6 +76,7 @@ jobs:
         with:
           message: "Version bump not needed"
           mode: delete
+          create_if_not_exists: false
           comment_tag: version_bump
 
       - name: Set up Go
@@ -87,33 +95,41 @@ jobs:
         env:
             ALL_CHANGED_FILES: ${{ steps.changed-json-files.outputs.all_changed_files }}
         run: |
+          git status
+          ls -al
           echo "linter_error=0" >> "$GITHUB_OUTPUT"
           echo "linter_output<<EOF" >> $GITHUB_ENV
           for file in ${ALL_CHANGED_FILES}; do
-            if ! `go env GOPATH`/bin/dc-template-linter -loglevel error -inplace $file 2>> $GITHUB_ENV; then
+            `go env GOPATH`/bin/dc-template-linter -loglevel info $file 2>> $GITHUB_ENV || true
+            if ! `go env GOPATH`/bin/dc-template-linter -loglevel error $file; then
                 echo "linter_error=1" >> "$GITHUB_OUTPUT"
+                echo "Linter error for $file"
+                `go env GOPATH`/bin/dc-template-linter -loglevel error $file || true
             fi
           done
           echo "EOF" >> $GITHUB_ENV
 
-      - name: Comment PR with linter result
+      - name: Comment PR with linter error result
         if: steps.linter-output.outputs.linter_error == 1
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            Linter result:
+            Linter error:
             ```
             ${{ env.linter_output }}
             ```
           comment_tag: linter
 
-      - name: Remove Comment PR with linter result if not needed
+      - name: Comment PR with linter OK result
         if: steps.linter-output.outputs.linter_error != 1
         uses: thollander/actions-comment-pull-request@v2
         with:
-          message: "Linter OK"
-          comment_tag: linter
-          delete: true
+            message: |
+              Linter OK:
+              ```
+              ${{ env.linter_output }}
+              ```
+            comment_tag: linter
 
       - name: Fail job if version check or linter fails
         if: steps.linter-output.outputs.linter_error == 1 || steps.check-version-bump-needed.outputs.version_bump_check == 1
