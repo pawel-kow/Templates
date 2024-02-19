@@ -97,7 +97,7 @@ jobs:
           echo "linter_error=0" >> "$GITHUB_OUTPUT"
           echo "linter_output<<EOF" >> $GITHUB_ENV
           for file in ${ALL_CHANGED_FILES}; do
-            `go env GOPATH`/bin/dc-template-linter -loglevel info $file 2>> $GITHUB_ENV
+            `go env GOPATH`/bin/dc-template-linter -loglevel info $file 2>> $GITHUB_ENV || true
             if ! `go env GOPATH`/bin/dc-template-linter -loglevel error $file; then
                 echo "linter_error=1" >> "$GITHUB_OUTPUT"
                 echo "Linter error for $file"
@@ -117,7 +117,7 @@ jobs:
             ```
           comment_tag: linter
 
-      - name: Remove Comment PR with linter result if not needed
+      - name: Comment PR with linter OK result
         if: steps.linter-output.outputs.linter_error != 1
         uses: thollander/actions-comment-pull-request@v2
         with:
