@@ -10,9 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
             fetch-depth: 2
+            ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Dump GitHub context
         env:
@@ -94,11 +95,14 @@ jobs:
         env:
             ALL_CHANGED_FILES: ${{ steps.changed-json-files.outputs.all_changed_files }}
         run: |
+          git status
+          ls -al
           echo "linter_error=0" >> "$GITHUB_OUTPUT"
           echo "linter_output<<EOF" >> $GITHUB_ENV
+          echo "Linter result for $file" >> $GITHUB_ENV
           for file in ${ALL_CHANGED_FILES}; do
-            `go env GOPATH`/bin/dc-template-linter -loglevel info $file 2>> $GITHUB_ENV
-            if ! `go env GOPATH`/bin/dc-template-linter -loglevel error $file; then
+            `go env GOPATH`/bin/dc-template-linter -loglevel info $file 2>> $GITHUB_ENV || true
+            if ! `go env GOPATH`/bin/dc-template-linter -tolerate warn $file; then
                 echo "linter_error=1" >> "$GITHUB_OUTPUT"
                 echo "Linter error for $file"
                 `go env GOPATH`/bin/dc-template-linter -loglevel error $file || true
@@ -117,7 +121,7 @@ jobs:
             ```
           comment_tag: linter
 
-      - name: Remove Comment PR with linter result if not needed
+      - name: Comment PR with linter OK result
         if: steps.linter-output.outputs.linter_error != 1
         uses: thollander/actions-comment-pull-request@v2
         with:
