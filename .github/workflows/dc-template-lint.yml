@@ -104,12 +104,10 @@ jobs:
         env:
             ALL_CHANGED_FILES: ${{ steps.changed-json-files.outputs.all_changed_files }}
         run: |
-          git status
-          ls -al
           echo "linter_error=0" >> "$GITHUB_OUTPUT"
           echo "linter_output<<EOF" >> $GITHUB_ENV
-          echo "Linter result for $file" >> $GITHUB_ENV
           for file in ${ALL_CHANGED_FILES}; do
+            echo "Linter result for $file" >> $GITHUB_ENV
             `go env GOPATH`/bin/dc-template-linter -loglevel info $file 2>> $GITHUB_ENV || true
             if ! `go env GOPATH`/bin/dc-template-linter -tolerate warn $file; then
                 echo "linter_error=1" >> "$GITHUB_OUTPUT"
