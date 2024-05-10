@@ -69,7 +69,7 @@ jobs:
             echo "EOF" >> $GITHUB_ENV
 
       - name: Comment PR with version check result
-        if: steps.check-version-bump-needed.outputs.version_bump_check == 1 && github.event_name == "pull_request_target"
+        if: steps.check-version-bump-needed.outputs.version_bump_check == 1 && github.event_name == 'pull_request_target'
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
@@ -80,7 +80,7 @@ jobs:
           comment_tag: version_bump
 
       - name: Remove comment PR with version check result if not needed
-        if: steps.check-version-bump-needed.outputs.version_bump_check != 1 && github.event_name == "pull_request_target"
+        if: steps.check-version-bump-needed.outputs.version_bump_check != 1 && github.event_name == 'pull_request_target'
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: "Version bump not needed"
@@ -120,7 +120,7 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - name: Comment PR with linter error result
-        if: steps.linter-output.outputs.linter_error == 1 && github.event_name == "pull_request_target"
+        if: steps.linter-output.outputs.linter_error == 1 && github.event_name == 'pull_request_target'
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
@@ -131,7 +131,7 @@ jobs:
           comment_tag: linter
 
       - name: Comment PR with linter OK result
-        if: steps.linter-output.outputs.linter_error != 1 && github.event_name == "pull_request_target"
+        if: steps.linter-output.outputs.linter_error != 1 && github.event_name == 'pull_request_target'
         uses: thollander/actions-comment-pull-request@v2
         with:
             message: |
