@@ -15,8 +15,8 @@ jobs:
       - name: Setup refs
         id: setup_refs
         run: |
-          echo "basesha=${{ github.event.pull_request.base.sha }}${{ github.event.merge_group.base_sha }}" >> "$GITHUB_OUTPUT"
-          echo "headsha=${{ github.event.pull_request.head.sha }}${{ github.event.merge_group.head_sha }}" >> "$GITHUB_OUTPUT"
+          echo "base_sha=${{ github.event.pull_request.base.sha }}${{ github.event.merge_group.base_sha }}" >> "$GITHUB_OUTPUT"
+          echo "head_sha=${{ github.event.pull_request.head.sha }}${{ github.event.merge_group.head_sha }}" >> "$GITHUB_OUTPUT"
         
       - name: Check out code
         uses: actions/checkout@v3
