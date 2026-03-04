@@ -104,17 +104,24 @@ def host_is_set(payload: dict) -> bool:
     return bool(host) and host != "@"
 
 
+def templates_equal(a: dict, b: dict) -> bool:
+    """Deep-equal comparison of two template dicts, ignoring key order."""
+    return json.loads(json.dumps(a, sort_keys=True)) == json.loads(
+        json.dumps(b, sort_keys=True)
+    )
+
+
 def check_template_coverage(
     template_files: list[str], payloads: list[dict]
 ) -> list[str]:
     """
-    For each template file, verify there are sufficient editor tests.
+    For each template file, verify there are sufficient editor tests and that
+    the template embedded in the token matches the file exactly.
     Returns a list of error strings (empty = all good).
     """
     errors = []
     for fpath in template_files:
         fname = os.path.basename(fpath)
-        # Read the template to check hostRequired
         try:
             with open(fpath) as f:
                 tmpl = json.load(f)
@@ -127,7 +134,7 @@ def check_template_coverage(
         service_id = tmpl.get("serviceId", "")
         expected_id = f"{provider_id}.{service_id}" if provider_id and service_id else None
 
-        # Filter payloads belonging to this template
+        # Filter payloads belonging to this template by providerId/serviceId
         matching = [
             p for p in payloads
             if template_id_from_payload(p) == expected_id
@@ -139,6 +146,22 @@ def check_template_coverage(
                 f"(expected template id '{expected_id}')"
             )
             continue
+
+        # Check that the template in each token matches the file exactly
+        stale = [
+            p for p in matching
+            if not templates_equal(p.get("template", {}), tmpl)
+        ]
+        if stale:
+            errors.append(
+                f"{fname}: {len(stale)}/{len(matching)} test link(s) contain "
+                f"a template that does not match the file in this PR "
+                f"(tests may be out of date)"
+            )
+            # Keep only matching-template payloads for host coverage checks
+            matching = [p for p in matching if templates_equal(p.get("template", {}), tmpl)]
+            if not matching:
+                continue
 
         if host_required:
             with_host = [p for p in matching if host_is_set(p)]
