@@ -10,9 +10,13 @@ REPO="${2:-Domain-Connect/Templates}"
 
 echo "=== Fetching PR #${PR_NUMBER} from ${REPO} ==="
 
-# Fetch PR body
-PR_BODY=$(curl -sf "https://api.github.com/repos/${REPO}/pulls/${PR_NUMBER}" \
-  | python3 -c "import sys,json; print(json.load(sys.stdin)['body'] or '')")
+# Fetch PR metadata (body + head sha + head repo)
+PR_META=$(curl -sf "https://api.github.com/repos/${REPO}/pulls/${PR_NUMBER}")
+PR_BODY=$(echo "$PR_META" | python3 -c "import sys,json; print(json.load(sys.stdin)['body'] or '')")
+HEAD_SHA=$(echo "$PR_META" | python3 -c "import sys,json; print(json.load(sys.stdin)['head']['sha'])")
+HEAD_REPO=$(echo "$PR_META" | python3 -c "import sys,json; print(json.load(sys.stdin)['head']['repo']['full_name'])")
+
+echo "Head: ${HEAD_REPO}@${HEAD_SHA}"
 
 # Fetch changed JSON template files (filenames only, space-separated)
 TEMPLATE_FILES=$(curl -sf "https://api.github.com/repos/${REPO}/pulls/${PR_NUMBER}/files" \
@@ -24,7 +28,7 @@ print(' '.join(files))
 
 echo "Template files in PR: ${TEMPLATE_FILES:-<none>}"
 
-# Download template files to a temp dir so the script can read them
+# Download template files from the PR's head commit so they match what was tested
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
 
@@ -32,12 +36,12 @@ DOWNLOADED_FILES=""
 for f in $TEMPLATE_FILES; do
   dest="$TMPDIR/$f"
   mkdir -p "$(dirname "$dest")"
-  url="https://raw.githubusercontent.com/${REPO}/refs/heads/master/${f}"
+  url="https://raw.githubusercontent.com/${HEAD_REPO}/${HEAD_SHA}/${f}"
   if curl -sf "$url" -o "$dest"; then
-    echo "  Downloaded: $f"
+    echo "  Downloaded: $f (from PR head)"
     DOWNLOADED_FILES="$DOWNLOADED_FILES $dest"
   else
-    echo "  WARNING: could not download $f (new file in PR?), skipping"
+    echo "  WARNING: could not download $f from PR head, skipping"
   fi
 done
 
