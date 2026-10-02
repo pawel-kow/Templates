@@ -12,5 +12,5 @@
 README.md
 AGENTS.md
 .github/*
+foo.txt
 template.schema
-
