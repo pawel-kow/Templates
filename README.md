@@ -296,3 +296,4 @@ Following is an example of a complete Domain Connect template, with examples of 
 
 Use [dc-template-linter](https://github.com/Domain-Connect/dc-template-linter) to validate templates — see [Lint Your Template](#2-lint-your-template) for installation and usage.
 < ntc test -->
+<!-- push 3 -->
